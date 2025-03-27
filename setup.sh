@@ -1,13 +1,13 @@
 #!/bin/bash
 
-REPO_URL="https://github.com/user/repo/archive/refs/heads/main.zip"
-ZIP_FILE="/tmp/repo.zip"
+ZIP_URL="https://raw.githubusercontent.com/FaruqAsap/pyserver-cloudflared/main/base.zip"
+ZIP_FILE="base.zip"
 
 echo "Mengunduh file dari GitHub..."
-wget -qO $ZIP_FILE $REPO_URL
+wget -qO $ZIP_FILE $ZIP_URL
 
 echo "Mengekstrak file..."
-unzip -o $ZIP_FILE -d /tmp/ && mv /tmp/repo-main/* . && rm -rf /tmp/repo-main
+unzip -o $ZIP_FILE && rm -f $ZIP_FILE
 
 if ! command -v python3 &>/dev/null; then
     echo "Python tidak ditemukan, menginstal Python..."
@@ -30,4 +30,14 @@ else
     echo "requirements.txt tidak ditemukan, melewati instalasi dependensi..."
 fi
 
-echo "Setup selesai!"
+echo "Menginstal Cloudflared..."
+curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+sudo dpkg -i cloudflared.deb
+rm -f cloudflared.deb
+
+read -p "Masukkan token Cloudflared: " CF_TOKEN
+
+echo "Menginstal token Cloudflared..."
+sudo cloudflared service install "$CF_TOKEN"
+
+echo "Setup selesai! Cloudflared telah dikonfigurasi."
